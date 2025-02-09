@@ -18,17 +18,17 @@
 
 buildscript {
     // Top-level variables used for versioning
-    ext.kotlin_version = '+'
+    ext.kotlin_version = '1.9.20'
     ext.java_version = JavaVersion.VERSION_1_8
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.2'
+        classpath 'com.android.tools.build:gradle:8.5.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.2.1"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -37,12 +37,11 @@ buildscript {
 
 allprojects {
     repositories {
-        mavenLocal()
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

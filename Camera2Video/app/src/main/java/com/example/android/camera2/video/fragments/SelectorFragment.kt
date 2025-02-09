@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package com.example.android.camera2.video.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
+import android.hardware.camera2.params.ColorSpaceProfiles
+import android.hardware.camera2.params.DynamicRangeProfiles
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Size
 import android.view.LayoutInflater
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -64,9 +65,61 @@ class SelectorFragment : Fragment() {
             adapter = GenericListAdapter(cameraList, itemLayoutId = layoutId) { view, item, _ ->
                 view.findViewById<TextView>(android.R.id.text1).text = item.name
                 view.setOnClickListener {
-                    Navigation.findNavController(requireActivity(), R.id.fragment_container)
-                            .navigate(SelectorFragmentDirections.actionSelectorToCamera(
-                                    item.cameraId, item.size.width, item.size.height, item.fps))
+                    var dynamicRangeProfiles: DynamicRangeProfiles? = null
+                    var colorSpaceProfiles: ColorSpaceProfiles? = null
+                    var supportsPreviewStabilization = false
+                    val characteristics = cameraManager.getCameraCharacteristics(item.cameraId)
+
+                    // DynamicRangeProfiles is introduced in android Tiramisu. If the SDK residing on
+                    // our device is older, do not call the non-existant paths.
+                    if (android.os.Build.VERSION.SDK_INT >=
+                            android.os.Build.VERSION_CODES.TIRAMISU) {
+                        val capabilities = characteristics.get(
+                                CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
+                        if (capabilities.contains(CameraCharacteristics
+                                .REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT)) {
+                            dynamicRangeProfiles = characteristics.get(
+                                    CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES)
+                        }
+
+                        val previewStabilizationModes = characteristics.get(
+                                CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES)!!
+                        supportsPreviewStabilization = previewStabilizationModes.contains(
+                                CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION)
+                    }
+
+                    if (android.os.Build.VERSION.SDK_INT >=
+                                android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        colorSpaceProfiles = characteristics.get(
+                            CameraCharacteristics.REQUEST_AVAILABLE_COLOR_SPACE_PROFILES)
+                    }
+
+                    val navController =
+                        Navigation.findNavController(requireActivity(), R.id.fragment_container)
+
+                    // If possible, navigate to a second selector for picking a dynamic range.
+                    // Otherwise continue on to video recording.
+                    if (dynamicRangeProfiles != null) {
+                        navController.navigate(
+                            SelectorFragmentDirections.actionSelectorToDynamicRange(
+                            item.cameraId, item.size.width, item.size.height, item.fps))
+                    } else if (colorSpaceProfiles != null) {
+                        navController.navigate(
+                            SelectorFragmentDirections.actionSelectorToColorSpace(
+                                item.cameraId, item.size.width, item.size.height, item.fps,
+                                DynamicRangeProfiles.STANDARD))
+                    } else if (supportsPreviewStabilization) {
+                        navController.navigate(
+                            SelectorFragmentDirections.actionSelectorToPreviewStabilization(
+                            item.cameraId, item.size.width, item.size.height, item.fps,
+                            DynamicRangeProfiles.STANDARD, ColorSpaceProfiles.UNSPECIFIED))
+                    } else {
+                        navController.navigate(
+                            SelectorFragmentDirections.actionSelectorToEncodeApi(
+                            item.cameraId, item.size.width, item.size.height, item.fps,
+                            DynamicRangeProfiles.STANDARD, ColorSpaceProfiles.UNSPECIFIED,
+                            /*previewStabilization*/ false))
+                    }
                 }
             }
         }
@@ -81,7 +134,7 @@ class SelectorFragment : Fragment() {
                 val fps: Int)
 
         /** Converts a lens orientation enum into a human-readable string */
-        private fun lensOrientationString(value: Int) = when(value) {
+        private fun lensOrientationString(value: Int) = when (value) {
             CameraCharacteristics.LENS_FACING_BACK -> "Back"
             CameraCharacteristics.LENS_FACING_FRONT -> "Front"
             CameraCharacteristics.LENS_FACING_EXTERNAL -> "External"
@@ -118,9 +171,12 @@ class SelectorFragment : Fragment() {
 
                     // For each size, list the expected FPS
                     cameraConfig.getOutputSizes(targetClass).forEach { size ->
-                        // Output frame duration is nanoseconds per frame so FPS is 1E9 / X
-                        val fps = (1_000_000_000.0 /
-                                cameraConfig.getOutputMinFrameDuration(targetClass, size)).toInt()
+                        // Get the number of seconds that each frame will take to process
+                        val secondsPerFrame =
+                                cameraConfig.getOutputMinFrameDuration(targetClass, size) /
+                                        1_000_000_000.0
+                        // Compute the frames per second to let user select a configuration
+                        val fps = if (secondsPerFrame > 0) (1.0 / secondsPerFrame).toInt() else 0
                         val fpsLabel = if (fps > 0) "$fps" else "N/A"
                         availableCameras.add(CameraInfo(
                                 "$orientation ($id) $size $fpsLabel FPS", id, size, fps))

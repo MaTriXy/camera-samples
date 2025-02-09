@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2020 The Android Open Source Project
+  ~ Copyright 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -39,16 +39,28 @@
         android:label="Selector" >
 
         <action
-            android:id="@+id/action_selector_to_camera"
+            android:id="@+id/action_selector_to_dynamic_range"
+            app:destination="@id/dynamic_range_fragment" />
+
+        <action
+            android:id="@+id/action_selector_to_color_space"
+            app:destination="@id/color_space_fragment" />
+
+        <action
+            android:id="@+id/action_selector_to_preview_stabilization"
+            app:destination="@id/preview_stabilization_fragment" />
+
+        <action
+            android:id="@+id/action_selector_to_encode_api"
             app:launchSingleTop="true"
-            app:destination="@id/camera_fragment" />
+            app:destination="@id/encode_api_fragment" />
 
     </fragment>
 
     <fragment
-        android:id="@+id/camera_fragment"
-        android:name="com.example.android.camera2.video.fragments.CameraFragment"
-        android:label="Camera" >
+        android:id="@+id/dynamic_range_fragment"
+        android:name="com.example.android.camera2.video.fragments.DynamicRangeFragment"
+        android:label="DynamicRange" >
 
         <argument
             android:name="camera_id"
@@ -68,9 +80,402 @@
             app:argType="integer" />
 
         <action
-            android:id="@+id/action_camera_to_permissions"
+            android:id="@+id/action_dynamic_range_to_color_space"
+            app:launchSingleTop="true"
+            app:destination="@id/color_space_fragment" />
+
+        <action
+            android:id="@+id/action_dynamic_range_to_preview_stabilization"
+            app:launchSingleTop="true"
+            app:destination="@id/preview_stabilization_fragment" />
+
+        <action
+            android:id="@+id/action_dynamic_range_to_encode_api"
+            app:launchSingleTop="true"
+            app:destination="@id/encode_api_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/color_space_fragment"
+        android:name="com.example.android.camera2.video.fragments.ColorSpaceFragment"
+        android:label="ColorSpace" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <action
+            android:id="@+id/action_color_space_to_preview_stabilization"
+            app:launchSingleTop="true"
+            app:destination="@id/preview_stabilization_fragment" />
+
+        <action
+            android:id="@+id/action_color_space_to_encode_api"
+            app:launchSingleTop="true"
+            app:destination="@id/encode_api_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/preview_stabilization_fragment"
+        android:name="com.example.android.camera2.video.fragments.PreviewStabilizationFragment"
+        android:label="PreviewStabilization" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <action
+            android:id="@+id/action_preview_stabilization_to_encode_api"
+            app:launchSingleTop="true"
+            app:destination="@id/encode_api_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/encode_api_fragment"
+        android:name="com.example.android.camera2.video.fragments.EncodeApiFragment"
+        android:label="EncodeApi" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <argument
+            android:name="previewStabilization"
+            app:argType="boolean" />
+
+        <action
+            android:id="@+id/action_encode_api_to_video_codec"
+            app:launchSingleTop="true"
+            app:destination="@id/video_codec_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/video_codec_fragment"
+        android:name="com.example.android.camera2.video.fragments.VideoCodecFragment"
+        android:label="Video Codec" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <argument
+            android:name="previewStabilization"
+            app:argType="boolean" />
+
+        <argument
+            android:name="useMediaRecorder"
+            app:argType="boolean" />
+
+        <action
+            android:id="@+id/action_video_codec_to_record_mode"
+            app:launchSingleTop="true"
+            app:destination="@id/record_mode_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/record_mode_fragment"
+        android:name="com.example.android.camera2.video.fragments.RecordModeFragment"
+        android:label="RecordMode" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <argument
+            android:name="previewStabilization"
+            app:argType="boolean" />
+
+        <argument
+            android:name="useMediaRecorder"
+            app:argType="boolean" />
+
+        <argument
+            android:name="videoCodec"
+            app:argType="integer" />
+
+        <action
+            android:id="@+id/action_record_mode_to_preview"
+            app:launchSingleTop="true"
+            app:destination="@id/preview_fragment" />
+
+        <action
+            android:id="@+id/action_record_mode_to_filter"
+            app:launchSingleTop="true"
+            app:destination="@id/filter_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/filter_fragment"
+        android:name="com.example.android.camera2.video.fragments.FilterFragment"
+        android:label="Filter" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <argument
+            android:name="previewStabilization"
+            app:argType="boolean" />
+
+        <argument
+            android:name="useMediaRecorder"
+            app:argType="boolean" />
+
+        <argument
+            android:name="videoCodec"
+            app:argType="integer" />
+
+        <action
+            android:id="@+id/action_filter_to_preview"
+            app:launchSingleTop="true"
+            app:destination="@id/preview_fragment" />
+
+        <action
+            android:id="@+id/action_filter_to_transfer"
+            app:launchSingleTop="true"
+            app:destination="@id/transfer_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/transfer_fragment"
+        android:name="com.example.android.camera2.video.fragments.TransferFragment"
+        android:label="Transfer" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <argument
+            android:name="previewStabilization"
+            app:argType="boolean" />
+
+        <argument
+            android:name="useMediaRecorder"
+            app:argType="boolean" />
+
+        <argument
+            android:name="videoCodec"
+            app:argType="integer" />
+
+        <argument
+            android:name="filterOn"
+            app:argType="boolean" />
+
+        <action
+            android:id="@+id/action_transfer_to_preview"
+            app:launchSingleTop="true"
+            app:destination="@id/preview_fragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/preview_fragment"
+        android:name="com.example.android.camera2.video.fragments.PreviewFragment"
+        android:label="Preview" >
+
+        <argument
+            android:name="camera_id"
+            app:argType="string"
+            app:nullable="false"/>
+
+        <argument
+            android:name="width"
+            app:argType="integer" />
+
+        <argument
+            android:name="height"
+            app:argType="integer" />
+
+        <argument
+            android:name="fps"
+            app:argType="integer" />
+
+        <argument
+            android:name="dynamicRange"
+            app:argType="long" />
+
+        <argument
+            android:name="colorSpace"
+            app:argType="integer" />
+
+        <argument
+            android:name="previewStabilization"
+            app:argType="boolean" />
+
+        <argument
+            android:name="useMediaRecorder"
+            app:argType="boolean" />
+
+        <argument
+            android:name="videoCodec"
+            app:argType="integer" />
+
+        <argument
+            android:name="filterOn"
+            app:argType="boolean" />
+
+        <argument
+            android:name="useHardware"
+            app:argType="boolean" />
+
+        <argument
+            android:name="transfer"
+            app:argType="integer" />
+
+        <action
+            android:id="@+id/action_preview_to_permissions"
             app:destination="@id/permissions_fragment"
-            app:popUpTo="@id/camera_fragment"
+            app:popUpTo="@id/preview_fragment"
             app:popUpToInclusive="true"/>
 
     </fragment>
